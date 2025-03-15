@@ -420,10 +420,117 @@
             transform: translateY(-50%);
             color: #999;
         }
+
+        /* 位置搜索样式 */
+        .location-search {
+            position: fixed;
+            top: 0;
+            right: 0;
+            padding: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 0 0 0 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .location-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 12px;
+            border: 1px solid #eee;
+            border-radius: 20px;
+            background: white;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .location-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+        }
+
+        .location-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .search-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .search-item:hover {
+            background: #f5f5f5;
+        }
+
+        .search-item-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .search-item-address {
+            font-size: 12px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- 位置搜索按钮 -->
+        <div class="location-search">
+            <button class="location-btn" id="locationBtn">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="currentLocationText">选择位置</span>
+            </button>
+        </div>
+
+        <!-- 位置搜索弹窗 -->
+        <div id="locationModal" class="location-modal">
+            <div class="location-modal-content">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">选择位置</h5>
+                    <button class="btn-close" id="modalClose"></button>
+                </div>
+                <div class="mb-3">
+                    <input type="text" 
+                           id="searchInput" 
+                           class="search-input" 
+                           placeholder="搜索地点（如：清华大学）"
+                           autocomplete="off">
+                </div>
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
+
         <!-- 位置栏 -->
         <div class="location-bar">
             <div class="location-header">
@@ -439,39 +546,6 @@
                 <button class="category-tab">快餐</button>
                 <button class="category-tab">饮品</button>
                 <button class="category-tab">甜点</button>
-            </div>
-        </div>
-
-        <!-- 位置选择弹窗 -->
-        <div id="locationModal" class="location-modal">
-            <div class="location-modal-content">
-                <div class="location-modal-header">
-                    <h5 class="mb-0">选择位置</h5>
-                    <button class="location-modal-close">&times;</button>
-                </div>
-                <div class="search-box">
-                    <input type="text" class="search-input" placeholder="搜索地点、商圈">
-                    <i class="fas fa-search search-icon"></i>
-                </div>
-                <button class="btn btn-outline-primary w-100 mb-3" id="getCurrentLocationBtn">
-                    <i class="fas fa-location-arrow me-2"></i>
-                    获取当前位置
-                </button>
-                <h6 class="mb-2">热门城市</h6>
-                <div class="quick-cities">
-                    <button class="city-btn" data-location="116.397428,39.909015">北京</button>
-                    <button class="city-btn" data-location="121.473701,31.230416">上海</button>
-                    <button class="city-btn" data-location="114.057868,22.543099">深圳</button>
-                    <button class="city-btn" data-location="113.264385,23.129112">广州</button>
-                    <button class="city-btn" data-location="120.153576,30.287459">杭州</button>
-                    <button class="city-btn" data-location="118.767413,32.041544">南京</button>
-                    <button class="city-btn" data-location="104.065735,30.659462">成都</button>
-                    <button class="city-btn" data-location="108.948024,34.263161">西安</button>
-                </div>
-                <h6 class="mb-2">最近访问</h6>
-                <div id="recentLocations" class="quick-cities">
-                    <!-- 最近访问的位置将通过 JavaScript 动态添加 -->
-                </div>
             </div>
         </div>
 
@@ -1001,7 +1075,7 @@
             const speedIncrease = 10; // 速度增加量
             
             // 清除之前的高亮
-            items.forEach(item => item.classList.remove('highlight'));
+            items[currentIndex].classList.remove('highlight');
             
             function highlight() {
                 // 清除上一个高亮
@@ -1088,7 +1162,7 @@
         // 位置选择相关功能
         const locationBtn = document.getElementById('locationBtn');
         const locationModal = document.getElementById('locationModal');
-        const locationModalClose = document.querySelector('.location-modal-close');
+        const modalClose = document.getElementById('modalClose');
         const getCurrentLocationBtn = document.getElementById('getCurrentLocationBtn');
         const currentLocationText = document.getElementById('currentLocationText');
 
@@ -1100,7 +1174,7 @@
         });
 
         // 关闭位置选择弹窗
-        locationModalClose.addEventListener('click', () => {
+        modalClose.addEventListener('click', () => {
             locationModal.style.display = 'none';
         });
 
@@ -1163,6 +1237,102 @@
                 tab.classList.add('active');
                 // 这里可以添加分类筛选逻辑
             });
+        });
+
+        // 高德地图搜索相关功能
+        async function searchLocation(keyword) {
+            const url = `https://restapi.amap.com/v3/place/text?key=${amapKey}&keywords=${encodeURIComponent(keyword)}&city=全国&output=JSON`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.status === '1' && data.pois && data.pois.length > 0) {
+                    return data.pois;
+                }
+                return [];
+            } catch (error) {
+                console.error('搜索位置失败:', error);
+                return [];
+            }
+        }
+
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // 初始化位置搜索功能
+        function initLocationSearch() {
+            const locationBtn = document.getElementById('locationBtn');
+            const locationModal = document.getElementById('locationModal');
+            const modalClose = document.getElementById('modalClose');
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            const currentLocationText = document.getElementById('currentLocationText');
+
+            // 打开搜索弹窗
+            locationBtn.addEventListener('click', () => {
+                locationModal.style.display = 'block';
+                searchInput.focus();
+            });
+
+            // 关闭搜索弹窗
+            modalClose.addEventListener('click', () => {
+                locationModal.style.display = 'none';
+            });
+
+            // 点击弹窗外部关闭
+            locationModal.addEventListener('click', (e) => {
+                if (e.target === locationModal) {
+                    locationModal.style.display = 'none';
+                }
+            });
+
+            // 搜索输入处理
+            const handleSearch = debounce(async (keyword) => {
+                if (keyword.length < 2) return;
+                
+                const results = await searchLocation(keyword);
+                searchResults.innerHTML = results.map(poi => `
+                    <div class="search-item" data-location="${poi.location}" data-name="${poi.name}">
+                        <div class="search-item-name">${poi.name}</div>
+                        <div class="search-item-address">${poi.address || poi.cityname + poi.adname}</div>
+                    </div>
+                `).join('');
+
+                // 绑定点击事件
+                document.querySelectorAll('.search-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const location = item.dataset.location;
+                        const name = item.dataset.name;
+                        setLocation(location);
+                        currentLocationText.textContent = name;
+                        locationModal.style.display = 'none';
+                        // 保存到历史记录
+                        saveLocationToHistory(location, name);
+                    });
+                });
+            }, 500);
+
+            searchInput.addEventListener('input', (e) => {
+                handleSearch(e.target.value.trim());
+            });
+        }
+
+        // 保存位置到历史记录
+        function saveLocationToHistory(location, name) {
+            let history = JSON.parse(localStorage.getItem('locationHistory') || '[]');
+            const newEntry = { location, name };
+            history = [newEntry, ...history.filter(item => item.location !== location)].slice(0, 5);
+            localStorage.setItem('locationHistory', JSON.stringify(history));
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initLocationSearch();
         });
     </script>
 </body>
