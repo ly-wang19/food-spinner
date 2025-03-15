@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>美食推荐</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 15px;
+            padding-bottom: 15px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .filters {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+
+        .grid-item {
+            position: relative;
+            aspect-ratio: 1;
+            background: #fff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .grid-item.highlight {
+            border-color: #ff4757;
+            background: #fff3f4;
+            transform: scale(1.05);
+            z-index: 1;
+        }
+
+        .restaurant-name {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #2d3436;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+
+        .restaurant-rating {
+            font-size: 11px;
+            color: #ff9f43;
+        }
+
+        .restaurant-price {
+            font-size: 11px;
+            color: #20bf6b;
+        }
+
+        .restaurant-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .restaurant-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-weight: bold;
+            touch-action: manipulation;
+        }
+
+        .btn-refresh {
+            background-color: #20bf6b;
+            border-color: #20bf6b;
+            color: white;
+        }
+
+        .btn-refresh:hover {
+            background-color: #26d07c;
+            border-color: #26d07c;
+        }
+
+        .btn-refresh:disabled {
+            background-color: #a8e6cf;
+            border-color: #a8e6cf;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .form-select, .form-control {
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .favorite-btn {
+            border: none;
+            background: none;
+            padding: 10px;
+            font-size: 24px;
+            color: #ff6b6b;
+            transition: transform 0.2s;
+        }
+
+        .favorite-btn:active {
+            transform: scale(0.9);
+        }
+
+        .favorite-btn.active {
+            color: #ff4757;
+        }
+
+        @media (max-width: 375px) {
+            .restaurant-name {
+                font-size: 12px;
+            }
+            .restaurant-rating, .restaurant-price {
+                font-size: 10px;
+            }
+            .grid-container {
+                gap: 8px;
+                padding: 8px;
+            }
+            .grid-item {
+                padding: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header text-center mb-4">
+            <h1>美食推荐</h1>
+            <p class="text-muted mb-4">让我们帮你选择今天的美食！</p>
+            <div class="button-group">
+                <button class="btn btn-refresh" id="spinButton">
+                    <i class="fas fa-sync-alt" aria-hidden="true"></i> 转一转
+                </button>
+                <button class="btn btn-refresh" id="refreshButton" disabled>
+                    <i class="fas fa-random" aria-hidden="true"></i> 换一批
+                </button>
+            </div>
+        </header>
+
+        <div class="filters" style="display: none;">
+            <h5>筛选条件</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="priceFilter" class="form-label">价格</label>
+                        <select class="form-select" id="priceFilter">
+                            <option value="">不限</option>
+                            <option value="¥">¥ 便宜</option>
+                            <option value="¥¥">¥¥ 适中</option>
+                            <option value="¥¥¥">¥¥¥ 贵</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="ratingFilter" class="form-label">评分</label>
+                        <select class="form-select" id="ratingFilter">
+                            <option value="">不限</option>
+                            <option value="3">3星以上</option>
+                            <option value="4">4星以上</option>
+                            <option value="4.5">4.5星以上</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="radiusFilter" class="form-label">范围</label>
+                        <select class="form-select" id="radiusFilter">
+                            <option value="1000">1公里</option>
+                            <option value="2000">2公里</option>
+                            <option value="3000" selected>3公里</option>
+                            <option value="5000">5公里</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+
+        <div class="grid-container" id="grid">
+            <!-- Grid items will be added here dynamically -->
+        </div>
+
+        <div class="restaurant-card" id="result">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="restaurant-title mb-0"></h4>
+                <button class="favorite-btn">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </div>
+            <div class="restaurant-info">
+                <div class="mb-2">
+                    <i class="fas fa-star text-warning"></i>
+                    <span class="restaurant-rating-value"></span>
+                </div>
+                <div class="mb-2">
+                    <i class="fas fa-yen-sign text-success"></i>
+                    <span class="restaurant-price-value"></span>
+                </div>
+                <div class="mb-2">
+                    <i class="fas fa-map-marker-alt text-danger"></i>
+                    <span class="restaurant-address"></span>
+                </div>
+                <div class="mb-2">
+                    <i class="fas fa-phone text-primary"></i>
+                    <span class="restaurant-phone"></span>
+                </div>
+            </div>
+            <div class="mt-3">
+                <a href="#" class="btn btn-primary w-100 restaurant-link" target="_blank">
+                    <i class="fas fa-location-arrow"></i> 导航前往
+                </a>
+            </div>
+        </div>
+
+        <div class="favorites-list">
+            <h3>收藏的餐厅</h3>
+            <div id="favoritesList" class="row"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentLocation = null;
+        let currentRestaurant = null;
+        let favorites = new Set();
+        let spinning = false;
+        let amapKey = '6128b7e34be4fce79dc0dd2d4167f9bf';
+        let restaurants = [];
+        let currentIndex = 0;
+        let animationInterval = null;
+        let currentPage = 1;
+        let allRestaurants = [];
+        let filteredRestaurants = [];
+
+        // 更新按钮状态
+        function updateButtonStates() {
+            const refreshButton = document.getElementById('refreshButton');
+            const spinButton = document.getElementById('spinButton');
+            
+            refreshButton.disabled = spinning || filteredRestaurants.length <= 9;
+            spinButton.disabled = spinning;
+        }
+
+        // 获取下一批餐厅
+        function getNextBatch() {
+            const start = currentPage * 9;
+            return filteredRestaurants.slice(start, start + 9);
+        }
+
+        // 刷新餐厅列表
+        async function refreshRestaurants() {
+            if (spinning) return;
+            
+            const nextBatch = getNextBatch();
+            if (nextBatch.length === 0) {
+                // 如果没有更多餐厅，重新获取数据
+                currentPage = 0;
+                await fetchRestaurants();
+            } else {
+                currentPage++;
+                updateGrid(nextBatch);
+            }
+            updateButtonStates();
+        }
+
+        // 获取餐厅数据
+        async function fetchRestaurants() {
+            const filters = getFilters();
+            
+            try {
+                // 确保我们有位置信息
+                if (!currentLocation) {
+                    console.log('Getting user location...');
+                    currentLocation = await getUserLocation();
+                }
+                console.log('Using location:', currentLocation);
+
+                // 获取餐厅数据
+                allRestaurants = await getRestaurantsFromAmap(currentLocation, filters.radius);
+                console.log('Got restaurants:', allRestaurants);
+
+                // 根据筛选条件过滤餐厅
+                filteredRestaurants = allRestaurants;
+                if (filters.price) {
+                    filteredRestaurants = filteredRestaurants.filter(r => r.cost?.startsWith(filters.price));
+                }
+                if (filters.rating) {
+                    filteredRestaurants = filteredRestaurants.filter(r => {
+                        const rating = parseFloat(r.biz_ext?.rating || 0);
+                        return rating >= parseFloat(filters.rating);
+                    });
+                }
+
+                if (filteredRestaurants.length === 0) {
+                    throw new Error('没有找到符合条件的餐厅');
+                }
+
+                // 更新格子显示
+                updateGrid(filteredRestaurants.slice(0, 9));
+                updateButtonStates();
+            } catch (error) {
+                console.error('Error fetching restaurants:', error);
+                alert(error.message || '获取餐厅数据时出错，请重试');
+                document.querySelector('.loading').classList.remove('show');
+            }
+        }
+
+        // 转盘动画和获取推荐
+        async function spinWheel() {
+            if (spinning) return;
+            spinning = true;
+            updateButtonStates();
+
+            const loadingIndicator = document.querySelector('.loading');
+            
+            try {
+                loadingIndicator.classList.add('show');
+                
+                // 如果还没有数据，先获取数据
+                if (filteredRestaurants.length === 0) {
+                    await fetchRestaurants();
+                }
+
+                const displayedRestaurants = document.querySelectorAll('.grid-item').length;
+                if (displayedRestaurants === 0) {
+                    throw new Error('没有找到符合条件的餐厅，请调整筛选条件后重试');
+                }
+
+                // 随机选择一家餐厅
+                const targetIndex = Math.floor(Math.random() * displayedRestaurants);
+                console.log('Chosen restaurant:', filteredRestaurants[currentPage * 9 + targetIndex]);
+
+                // 开始动画
+                currentIndex = 0;
+                animateSelection(targetIndex);
+            } catch (error) {
+                console.error('Error during spin:', error);
+                alert(error.message || '获取推荐时出错，请重试');
+                spinning = false;
+                updateButtonStates();
+                loadingIndicator.classList.remove('show');
+            }
+        }
+
+        // 获取用户位置
+        async function getUserLocation() {
+            try {
+                if (!navigator.geolocation) {
+                    console.log('Geolocation not supported, using default location');
+                    return '116.473168,39.993015';
+                }
+
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                });
+
+                const location = `${position.coords.longitude},${position.coords.latitude}`;
+                console.log('Got user location:', location);
+                return location;
+            } catch (error) {
+                console.error('Error getting location:', error);
+                return '116.473168,39.993015';
+            }
+        }
+
+        // 直接从高德 API 获取餐厅数据
+        async function getRestaurantsFromAmap(location, radius = 3000) {
+            const url = `https://restapi.amap.com/v3/place/around?key=${amapKey}&location=${location}&radius=${radius}&types=050000&offset=25&extensions=all`;
+            console.log('Fetching from Amap:', url);
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log('Amap response:', data);
+                
+                if (data.status === '1') {
+                    return data.pois || [];
+                }
+                console.error('Amap API error:', data);
+                return [];
+            } catch (error) {
+                console.error('Error fetching from Amap:', error);
+                return [];
+            }
+        }
+
+        // 加载收藏的餐厅
+        async function loadFavorites() {
+            try {
+                const response = await fetch('/api/favorites');
+                const data = await response.json();
+                favorites = new Set(data.map(r => r.amap_id));
+                updateFavoritesList(data);
+            } catch (error) {
+                console.error('Error loading favorites:', error);
+            }
+        }
+
+        // 更新收藏列表显示
+        function updateFavoritesList(restaurants) {
+            const favoritesList = document.getElementById('favoritesList');
+            favoritesList.innerHTML = '';
+            
+            restaurants.forEach(restaurant => {
+                const col = document.createElement('div');
+                col.className = 'col-md-6 mb-3';
+                col.innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">${restaurant.name}</h5>
+                            <p class="card-text">
+                                <small>${restaurant.category}</small><br>
+                                <i class="fas fa-map-marker-alt"></i> ${restaurant.address}<br>
+                                ${restaurant.rating ? `<i class="fas fa-star"></i> ${restaurant.rating}` : ''}<br>
+                                ${restaurant.price ? `<i class="fas fa-yen-sign"></i> ${restaurant.price}` : ''}
+                            </p>
+                            <button class="btn btn-danger btn-sm" onclick="toggleFavorite('${restaurant.amap_id}')">
+                                <i class="fas fa-heart"></i> 取消收藏
+                            </button>
+                        </div>
+                    </div>
+                `;
+                favoritesList.appendChild(col);
+            });
+        }
+
+        // 更新餐厅信息显示
+        function updateRestaurantDisplay(restaurant) {
+            if (!restaurant) return;
+            
+            currentRestaurant = restaurant;
+            const card = document.getElementById('result');
+            
+            // 更新餐厅信息
+            card.querySelector('.restaurant-title').textContent = restaurant.name;
+            card.querySelector('.restaurant-rating-value').textContent = restaurant.biz_ext?.rating || '暂无评分';
+            card.querySelector('.restaurant-price-value').textContent = restaurant.cost || '价格未知';
+            card.querySelector('.restaurant-address').textContent = restaurant.address || '地址未知';
+            card.querySelector('.restaurant-phone').textContent = restaurant.tel || '电话未知';
+            
+            // 更新导航链接
+            const link = card.querySelector('.restaurant-link');
+            const mapUrl = `https://uri.amap.com/marker?position=${restaurant.location}&name=${encodeURIComponent(restaurant.name)}`;
+            link.href = mapUrl;
+            
+            // 更新收藏状态
+            const favoriteBtn = card.querySelector('.favorite-btn');
+            favoriteBtn.classList.toggle('active', favorites.has(restaurant.id));
+            
+            // 显示卡片
+            card.style.display = 'block';
+            
+            // 平滑滚动到餐厅详情
+            setTimeout(() => {
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 500);
+        }
+
+        // 获取筛选条件
+        function getFilters() {
+            return {
+                price: document.getElementById('priceFilter').value,
+                rating: document.getElementById('ratingFilter').value,
+                radius: document.getElementById('radiusFilter').value
+            };
+        }
+
+        // 更新抽奖格子显示
+        function updateGrid(restaurantsList) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            restaurants = restaurantsList; // 更新当前显示的餐厅列表
+            
+            restaurantsList.forEach((restaurant, index) => {
+                const gridItem = document.createElement('div');
+                gridItem.className = 'grid-item';
+                gridItem.setAttribute('data-index', index);
+                
+                const content = document.createElement('div');
+                content.className = 'grid-item-content';
+                
+                const name = document.createElement('div');
+                name.className = 'restaurant-name';
+                name.textContent = restaurant.name;
+                
+                const rating = document.createElement('div');
+                rating.className = 'restaurant-rating';
+                rating.innerHTML = `<i class="fas fa-star"></i> ${restaurant.biz_ext?.rating || '暂无评分'}`;
+                
+                const price = document.createElement('div');
+                price.className = 'restaurant-price';
+                price.textContent = restaurant.cost || '价格未知';
+                
+                content.appendChild(name);
+                content.appendChild(rating);
+                content.appendChild(price);
+                gridItem.appendChild(content);
+                grid.appendChild(gridItem);
+            });
+        }
+
+        // 动画效果
+        function animateSelection(targetIndex) {
+            const items = document.querySelectorAll('.grid-item');
+            const totalItems = items.length;
+            let speed = 100; // 初始速度
+            const maxSpeed = 300; // 最大速度
+            const speedIncrease = 10; // 速度增加量
+            
+            // 清除之前的高亮
+            items.forEach(item => item.classList.remove('highlight'));
+            
+            function highlight() {
+                // 清除上一个高亮
+                items[currentIndex].classList.remove('highlight');
+                
+                // 更新索引
+                currentIndex = (currentIndex + 1) % totalItems;
+                
+                // 添加新的高亮
+                items[currentIndex].classList.add('highlight');
+                
+                // 逐渐减慢速度
+                speed = Math.min(speed + speedIncrease, maxSpeed);
+                
+                // 检查是否到达目标
+                if (speed >= maxSpeed && currentIndex === targetIndex) {
+                    clearInterval(animationInterval);
+                    spinning = false;
+                    // 使用当前显示的餐厅列表
+                    const selectedRestaurant = restaurants[targetIndex];
+                    updateRestaurantDisplay(selectedRestaurant);
+                    document.querySelector('.loading').classList.remove('show');
+                    updateButtonStates();
+                }
+            }
+            
+            // 开始动画
+            clearInterval(animationInterval);
+            animationInterval = setInterval(highlight, speed);
+        }
+
+        // 收藏/取消收藏餐厅
+        async function toggleFavorite() {
+            if (!currentRestaurant) return;
+
+            try {
+                if (favorites.has(currentRestaurant.id)) {
+                    const response = await fetch(`/api/favorites?id=${currentRestaurant.id}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        favorites.delete(currentRestaurant.id);
+                    }
+                } else {
+                    const response = await fetch('/api/favorites', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(currentRestaurant)
+                    });
+                    if (response.ok) {
+                        favorites.add(currentRestaurant.id);
+                    }
+                }
+
+                // 更新收藏按钮状态
+                document.querySelector('.favorite-btn i').classList.toggle('active', favorites.has(currentRestaurant.id));
+                
+                // 重新加载收藏列表
+                await loadFavorites();
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+                alert('操作失败，请重试');
+            }
+        }
+
+        // 初始化
+        async function init() {
+            console.log('Initializing app...');
+            currentLocation = await getUserLocation();
+            console.log('Initial location:', currentLocation);
+            await loadFavorites();
+            
+            // 绑定事件
+            document.getElementById('spinButton').addEventListener('click', spinWheel);
+            document.getElementById('refreshButton').addEventListener('click', refreshRestaurants);
+            document.querySelector('.favorite-btn').addEventListener('click', toggleFavorite);
+            
+            // 初始化获取数据
+            await fetchRestaurants();
+        }
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
