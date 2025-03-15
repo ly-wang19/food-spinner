@@ -231,6 +231,27 @@
                 padding: 6px;
             }
         }
+        
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            z-index: 1000;
+            text-align: center;
+            animation: fadeInOut 3s ease;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -345,6 +366,61 @@
         let currentPage = 1;
         let allRestaurants = [];
         let filteredRestaurants = [];
+        let defaultLocation = '116.473168,39.993015'; // 默认位置
+
+        // 获取位置信息
+        async function getLocation() {
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    });
+                });
+                
+                currentLocation = `${position.coords.longitude},${position.coords.latitude}`;
+                return currentLocation;
+            } catch (error) {
+                console.log('获取位置失败，使用默认位置', error);
+                currentLocation = defaultLocation;
+                return currentLocation;
+            }
+        }
+
+        // 获取餐厅列表
+        async function getRestaurants() {
+            try {
+                const location = await getLocation();
+                const filters = getFilters();
+                const response = await fetch(`/api/restaurants?location=${location}&${new URLSearchParams(filters)}`);
+                const data = await response.json();
+                
+                if (!data || data.length === 0) {
+                    showToast('没有找到符合条件的餐厅，尝试扩大搜索范围');
+                    return false;
+                }
+                
+                restaurants = data;
+                return true;
+            } catch (error) {
+                console.error('获取餐厅列表失败:', error);
+                showToast('获取餐厅列表失败，请稍后重试');
+                return false;
+            }
+        }
+
+        // 显示提示信息
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
 
         // 更新按钮状态
         function updateButtonStates() {
@@ -369,7 +445,7 @@
             if (nextBatch.length === 0) {
                 // 如果没有更多餐厅，重新获取数据
                 currentPage = 0;
-                await fetchRestaurants();
+                await getRestaurants();
             } else {
                 currentPage++;
                 updateGrid(nextBatch);
@@ -385,7 +461,7 @@
                 // 确保我们有位置信息
                 if (!currentLocation) {
                     console.log('Getting user location...');
-                    currentLocation = await getUserLocation();
+                    currentLocation = await getLocation();
                 }
                 console.log('Using location:', currentLocation);
 
@@ -416,64 +492,6 @@
                 console.error('Error fetching restaurants:', error);
                 alert(error.message || '获取餐厅数据时出错，请重试');
                 document.querySelector('.loading').classList.remove('show');
-            }
-        }
-
-        // 转盘动画和获取推荐
-        async function spinWheel() {
-            if (spinning) return;
-            spinning = true;
-            updateButtonStates();
-
-            const loadingIndicator = document.querySelector('.loading');
-            
-            try {
-                loadingIndicator.classList.add('show');
-                
-                // 如果还没有数据，先获取数据
-                if (filteredRestaurants.length === 0) {
-                    await fetchRestaurants();
-                }
-
-                const displayedRestaurants = document.querySelectorAll('.grid-item').length;
-                if (displayedRestaurants === 0) {
-                    throw new Error('没有找到符合条件的餐厅，请调整筛选条件后重试');
-                }
-
-                // 随机选择一家餐厅
-                const targetIndex = Math.floor(Math.random() * displayedRestaurants);
-                console.log('Chosen restaurant:', filteredRestaurants[currentPage * 9 + targetIndex]);
-
-                // 开始动画
-                currentIndex = 0;
-                animateSelection(targetIndex);
-            } catch (error) {
-                console.error('Error during spin:', error);
-                alert(error.message || '获取推荐时出错，请重试');
-                spinning = false;
-                updateButtonStates();
-                loadingIndicator.classList.remove('show');
-            }
-        }
-
-        // 获取用户位置
-        async function getUserLocation() {
-            try {
-                if (!navigator.geolocation) {
-                    console.log('Geolocation not supported, using default location');
-                    return '116.473168,39.993015';
-                }
-
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject);
-                });
-
-                const location = `${position.coords.longitude},${position.coords.latitude}`;
-                console.log('Got user location:', location);
-                return location;
-            } catch (error) {
-                console.error('Error getting location:', error);
-                return '116.473168,39.993015';
             }
         }
 
@@ -613,6 +631,43 @@
             });
         }
 
+        // 转盘动画和获取推荐
+        async function spinWheel() {
+            if (spinning) return;
+            spinning = true;
+            updateButtonStates();
+
+            const loadingIndicator = document.querySelector('.loading');
+            
+            try {
+                loadingIndicator.classList.add('show');
+                
+                // 如果还没有数据，先获取数据
+                if (filteredRestaurants.length === 0) {
+                    await fetchRestaurants();
+                }
+
+                const displayedRestaurants = document.querySelectorAll('.grid-item').length;
+                if (displayedRestaurants === 0) {
+                    throw new Error('没有找到符合条件的餐厅，请调整筛选条件后重试');
+                }
+
+                // 随机选择一家餐厅
+                const targetIndex = Math.floor(Math.random() * displayedRestaurants);
+                console.log('Chosen restaurant:', filteredRestaurants[currentPage * 9 + targetIndex]);
+
+                // 开始动画
+                currentIndex = 0;
+                animateSelection(targetIndex);
+            } catch (error) {
+                console.error('Error during spin:', error);
+                alert(error.message || '获取推荐时出错，请重试');
+                spinning = false;
+                updateButtonStates();
+                loadingIndicator.classList.remove('show');
+            }
+        }
+
         // 动画效果
         function animateSelection(targetIndex) {
             const items = document.querySelectorAll('.grid-item');
@@ -693,8 +748,6 @@
         // 初始化
         async function init() {
             console.log('Initializing app...');
-            currentLocation = await getUserLocation();
-            console.log('Initial location:', currentLocation);
             await loadFavorites();
             
             // 绑定事件
