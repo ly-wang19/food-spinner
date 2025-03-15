@@ -10,7 +10,7 @@
         body {
             background-color: #f8f9fa;
             padding: 15px;
-            padding-bottom: 15px;
+            padding-bottom: 80px;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
         }
@@ -33,30 +33,147 @@
             margin-bottom: 10px;
         }
 
-        .button-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .controls {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 15px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        /* 位置搜索样式 */
+        .location-search {
+            position: absolute;
+            top: 20px;
+            left: 20px;
             z-index: 1000;
         }
 
-        .filters {
+        .location-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 12px;
+            border: 1px solid #eee;
+            border-radius: 20px;
             background: white;
-            border-radius: 15px;
-            padding: 15px;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 160px; /* 最终调整宽度 */
+            position: relative;
+            z-index: 1000;
+        }
+
+        .location-btn span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 124px; /* 最终调整宽度 */
+            display: inline-block;
+            line-height: 1.2;
+            vertical-align: middle; /* 优化文字垂直对齐 */
+        }
+
+        .location-btn i {
+            font-size: 16px;
+            vertical-align: middle;
+        }
+
+        .location-btn:hover {
+            background: #f5f5f5;
+            border-color: #ddd;
+        }
+
+        .location-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+        }
+
+        .location-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .search-input-container {
+            position: relative;
             margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .search-results {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 0 -20px;
+            padding: 0 20px;
+        }
+
+        .search-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .search-item:hover {
+            background: #f8f9fa;
+        }
+
+        .search-item:active {
+            background: #f0f0f0;
+        }
+
+        .search-item-name {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .search-item-address {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .empty-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 20px;
+            color: #666;
         }
 
         .grid-container {
@@ -117,26 +234,11 @@
             color: #20bf6b;
         }
 
-        .restaurant-card {
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            margin-top: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .restaurant-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
         .button-group {
             display: flex;
             gap: 10px;
             justify-content: center;
+            margin-top: 20px;
         }
 
         .btn {
@@ -160,6 +262,52 @@
         .btn-refresh:disabled {
             background-color: #a8e6cf;
             border-color: #a8e6cf;
+        }
+
+        .restaurant-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .favorite-btn {
+            border: none;
+            background: none;
+            padding: 10px;
+            font-size: 24px;
+            color: #ff6b6b;
+            transition: transform 0.2s;
+        }
+
+        .favorite-btn:active {
+            transform: scale(0.9);
+        }
+
+        .favorite-btn.active {
+            color: #ff4757;
+        }
+
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            z-index: 1000;
+            text-align: center;
+            animation: fadeInOut 3s ease;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         .loading {
@@ -192,388 +340,21 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .form-select, .form-control {
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 14px;
-        }
-
-        .favorite-btn {
-            border: none;
-            background: none;
-            padding: 10px;
-            font-size: 24px;
-            color: #ff6b6b;
-            transition: transform 0.2s;
-        }
-
-        .favorite-btn:active {
-            transform: scale(0.9);
-        }
-
-        .favorite-btn.active {
-            color: #ff4757;
-        }
-
-        @media (max-width: 375px) {
-            .restaurant-name {
-                font-size: 12px;
-            }
-            .restaurant-rating, .restaurant-price {
-                font-size: 10px;
-            }
-            .grid-container {
-                gap: 8px;
-                padding: 8px;
-            }
-            .grid-item {
-                padding: 6px;
-            }
-        }
-        
-        .toast {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 25px;
-            z-index: 1000;
-            text-align: center;
-            animation: fadeInOut 3s ease;
-        }
-        
-        @keyframes fadeInOut {
-            0% { opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        .location-selector {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .quick-cities {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .custom-location {
-            max-width: 300px;
-            margin: 0 auto;
-        }
-        
-        .custom-location input {
-            margin-bottom: 5px;
-        }
-        
-        .location-status {
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-        
-        @media (max-width: 768px) {
-            .location-selector {
-                padding: 10px;
-            }
-            
-            .quick-cities button {
-                padding: 4px 8px;
-                font-size: 0.9em;
-            }
-            
-            .custom-location {
-                max-width: 100%;
-            }
-        }
-
-        /* 新增样式 */
-        .location-bar {
-            background: white;
-            padding: 12px 16px;
-            border-bottom: 1px solid #eee;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .location-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .location-icon {
-            color: #666;
-        }
-
-        .category-tabs {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            padding: 5px 0;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .category-tab {
-            padding: 6px 16px;
-            border-radius: 20px;
-            white-space: nowrap;
-            background: #f5f5f5;
-            border: none;
-            color: #666;
-        }
-
-        .category-tab.active {
-            background: #ffd373;
-            color: #333;
-        }
-
-        .filter-icon {
-            padding: 8px;
-            border-radius: 50%;
-            background: #f5f5f5;
-            color: #666;
-        }
-
-        /* 位置选择弹窗 */
-        .location-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-
-        .location-modal-content {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 16px 16px 0 0;
-            padding: 20px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .location-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .location-modal-close {
-            border: none;
-            background: none;
-            font-size: 24px;
-            color: #666;
-        }
-
-        .quick-cities {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .city-btn {
-            padding: 8px;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            background: white;
-            text-align: center;
-        }
-
-        .search-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 10px 40px 10px 15px;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
-        }
-
-        /* 位置搜索样式 */
-        .location-search {
-            position: fixed;
-            top: 0;
-            right: 0;
-            padding: 10px;
-            z-index: 1000;
-            background: white;
-            border-radius: 0 0 0 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .location-btn {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 8px 12px;
-            border: 1px solid #eee;
-            border-radius: 20px;
-            background: white;
-            color: #333;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .location-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1001;
-        }
-
-        .location-modal-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 400px;
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .search-results {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .search-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
-
-        .search-item:hover {
-            background: #f5f5f5;
-        }
-
-        .search-item-name {
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-
-        .search-item-address {
-            font-size: 12px;
-            color: #666;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 位置搜索按钮 -->
-        <div class="location-search">
-            <button class="location-btn" id="locationBtn">
-                <i class="fas fa-map-marker-alt"></i>
-                <span id="currentLocationText">选择位置</span>
-            </button>
-        </div>
-
-        <!-- 位置搜索弹窗 -->
-        <div id="locationModal" class="location-modal">
-            <div class="location-modal-content">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">选择位置</h5>
-                    <button class="btn-close" id="modalClose"></button>
-                </div>
-                <div class="mb-3">
-                    <input type="text" 
-                           id="searchInput" 
-                           class="search-input" 
-                           placeholder="搜索地点（如：清华大学）"
-                           autocomplete="off">
-                </div>
-                <div id="searchResults" class="search-results"></div>
-            </div>
-        </div>
-
-        <!-- 位置栏 -->
-        <div class="location-bar">
-            <div class="location-header">
-                <button id="locationBtn" class="btn" style="text-align: left; padding: 0;">
-                    <i class="fas fa-map-marker-alt location-icon"></i>
-                    <span id="currentLocationText">正在获取位置...</span>
-                    <i class="fas fa-chevron-down ms-1"></i>
+        <header class="header text-center mb-4 position-relative">
+            <div class="location-search">
+                <button class="location-btn" id="locationBtn">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span id="currentLocationText">选择位置</span>
                 </button>
             </div>
-            <div class="category-tabs">
-                <button class="category-tab active">随机</button>
-                <button class="category-tab">正餐</button>
-                <button class="category-tab">快餐</button>
-                <button class="category-tab">饮品</button>
-                <button class="category-tab">甜点</button>
-            </div>
-        </div>
 
-        <header class="header text-center mb-4">
             <h1>美食推荐</h1>
             <p class="text-muted mb-4">让我们帮你选择今天的美食！</p>
             
-            <!-- 添加位置选择区域 -->
-            <div class="location-selector mb-4">
-                <div class="current-location mb-2">
-                    <button class="btn btn-outline-primary btn-sm" id="getLocationBtn">
-                        <i class="fas fa-location-arrow"></i> 获取当前位置
-                    </button>
-                    <span id="locationStatus" class="text-muted ms-2"></span>
-                </div>
-                <div class="quick-cities mb-2">
-                    <button class="btn btn-sm btn-outline-secondary" data-location="116.397428,39.909015">北京</button>
-                    <button class="btn btn-sm btn-outline-secondary" data-location="121.473701,31.230416">上海</button>
-                    <button class="btn btn-sm btn-outline-secondary" data-location="114.057868,22.543099">深圳</button>
-                    <button class="btn btn-sm btn-outline-secondary" data-location="113.264385,23.129112">广州</button>
-                </div>
-                <div class="custom-location">
-                    <input type="text" id="customLocation" class="form-control form-control-sm" 
-                           placeholder="输入位置坐标（经度,纬度）如：116.397428,39.909015">
-                    <small class="text-muted">提示：可以从高德地图获取位置坐标</small>
-                </div>
-            </div>
-
             <div class="button-group">
                 <button class="btn btn-refresh" id="spinButton">
                     <i class="fas fa-sync-alt" aria-hidden="true"></i> 转一转
@@ -584,41 +365,23 @@
             </div>
         </header>
 
-        <div class="filters" style="display: none;">
-            <h5>筛选条件</h5>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="priceFilter" class="form-label">价格</label>
-                        <select class="form-select" id="priceFilter">
-                            <option value="">不限</option>
-                            <option value="¥">¥ 便宜</option>
-                            <option value="¥¥">¥¥ 适中</option>
-                            <option value="¥¥¥">¥¥¥ 贵</option>
-                        </select>
-                    </div>
+        <!-- 位置搜索弹窗 -->
+        <div id="locationModal" class="location-modal">
+            <div class="location-modal-content">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">搜索位置</h5>
+                    <button class="btn-close" id="modalClose"></button>
                 </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="ratingFilter" class="form-label">评分</label>
-                        <select class="form-select" id="ratingFilter">
-                            <option value="">不限</option>
-                            <option value="3">3星以上</option>
-                            <option value="4">4星以上</option>
-                            <option value="4.5">4.5星以上</option>
-                        </select>
-                    </div>
+                <div class="search-input-container">
+                    <input type="text" 
+                           id="searchInput" 
+                           class="search-input" 
+                           placeholder="搜索地点（如：清华大学）"
+                           autocomplete="off">
+                    <i class="fas fa-search search-icon"></i>
                 </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="radiusFilter" class="form-label">范围</label>
-                        <select class="form-select" id="radiusFilter">
-                            <option value="1000">1公里</option>
-                            <option value="2000">2公里</option>
-                            <option value="3000" selected>3公里</option>
-                            <option value="5000">5公里</option>
-                        </select>
-                    </div>
+                <div id="searchResults" class="search-results">
+                    <!-- 搜索结果将在这里动态显示 -->
                 </div>
             </div>
         </div>
@@ -631,7 +394,7 @@
             <!-- Grid items will be added here dynamically -->
         </div>
 
-        <div class="restaurant-card" id="result">
+        <div class="restaurant-card" id="result" style="display: none;">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="restaurant-title mb-0"></h4>
                 <button class="favorite-btn">
@@ -662,11 +425,6 @@
                 </a>
             </div>
         </div>
-
-        <div class="favorites-list">
-            <h3>收藏的餐厅</h3>
-            <div id="favoritesList" class="row"></div>
-        </div>
     </div>
 
     <script>
@@ -682,576 +440,98 @@
         let allRestaurants = [];
         let filteredRestaurants = [];
         let defaultLocation = '116.473168,39.993015';
-        let locationTimeout = 10000; // 10秒超时
-
-        // 初始化位置选择器
-        function initLocationSelector() {
-            // 获取当前位置按钮
-            const getLocationBtn = document.getElementById('getLocationBtn');
-            getLocationBtn.addEventListener('click', getCurrentLocation);
-
-            // 快速城市选择
-            document.querySelectorAll('.quick-cities button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const location = e.target.dataset.location;
-                    setLocation(location);
-                });
-            });
-
-            // 自定义位置输入
-            const customLocationInput = document.getElementById('customLocation');
-            customLocationInput.addEventListener('change', (e) => {
-                const location = e.target.value.trim();
-                if (isValidLocation(location)) {
-                    setLocation(location);
-                } else {
-                    showToast('请输入正确的位置坐标（经度,纬度）');
-                }
-            });
-        }
-
-        // 验证位置格式
-        function isValidLocation(location) {
-            const pattern = /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/;
-            if (!pattern.test(location)) return false;
-            
-            const [lon, lat] = location.split(',').map(Number);
-            return lon >= -180 && lon <= 180 && lat >= -90 && lat <= 90;
-        }
-
-        // 设置位置
-        function setLocation(location) {
-            if (isValidLocation(location)) {
-                currentLocation = location;
-                document.getElementById('locationStatus').textContent = '位置已更新';
-                showToast('位置已更新，点击转一转开始推荐');
-                // 保存到本地存储
-                saveLocationToHistory(location);
-            }
-        }
-
-        // 保存位置到历史记录
-        function saveLocationToHistory(location) {
-            let history = JSON.parse(localStorage.getItem('locationHistory') || '[]');
-            if (!history.includes(location)) {
-                history.unshift(location);
-                history = history.slice(0, 5); // 只保留最近5条记录
-                localStorage.setItem('locationHistory', JSON.stringify(history));
-            }
-        }
 
         // 获取当前位置
         async function getCurrentLocation() {
-            const statusElement = document.getElementById('locationStatus');
-            statusElement.textContent = '正在获取位置...';
-            
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    const timeoutId = setTimeout(() => {
-                        reject(new Error('获取位置超时'));
-                    }, locationTimeout);
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('浏览器不支持地理位置'));
+                    return;
+                }
 
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            clearTimeout(timeoutId);
-                            resolve(position);
-                        },
-                        (error) => {
-                            clearTimeout(timeoutId);
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const { latitude, longitude } = position.coords;
+                        // 使用高德地图API进行逆地理编码
+                        try {
+                            const url = `https://restapi.amap.com/v3/geocode/regeo?key=${amapKey}&location=${longitude},${latitude}&extensions=all&output=JSON`;
+                            const response = await fetch(url);
+                            const data = await response.json();
+                            
+                            if (data.status === '1' && data.regeocode) {
+                                const location = `${longitude},${latitude}`;
+                                let name = '当前位置';
+
+                                // 优先使用最近的POI名称
+                                if (data.regeocode.pois && data.regeocode.pois.length > 0) {
+                                    // 按距离排序，取最近的POI
+                                    const nearestPoi = data.regeocode.pois.sort((a, b) => {
+                                        return (parseFloat(a.distance) || 0) - (parseFloat(b.distance) || 0);
+                                    })[0];
+                                    name = nearestPoi.name;
+                                }
+
+                                setLocation(location);
+                                setLocationName(name);
+                                resolve(location);
+                            } else {
+                                reject(new Error('获取位置信息失败'));
+                            }
+                        } catch (error) {
+                            console.error('获取位置信息失败:', error);
                             reject(error);
-                        },
-                        {
-                            enableHighAccuracy: true,
-                            timeout: locationTimeout,
-                            maximumAge: 0
                         }
-                    );
-                });
-
-                const location = `${position.coords.longitude},${position.coords.latitude}`;
-                setLocation(location);
-                statusElement.textContent = '已获取当前位置';
-            } catch (error) {
-                console.error('获取位置失败:', error);
-                statusElement.textContent = '获取位置失败';
-                showToast('获取位置失败，请手动选择位置或使用默认位置');
-                setLocation(defaultLocation);
-            }
-        }
-
-        // 显示提示信息
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
-        // 初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            initLocationSelector();
-            // 尝试获取当前位置
-            getCurrentLocation();
-        });
-
-        // 获取餐厅列表
-        async function getRestaurants() {
-            try {
-                const location = await getLocation();
-                const filters = getFilters();
-                const response = await fetch(`/api/restaurants?location=${location}&${new URLSearchParams(filters)}`);
-                const data = await response.json();
-                
-                if (!data || data.length === 0) {
-                    showToast('没有找到符合条件的餐厅，尝试扩大搜索范围');
-                    return false;
-                }
-                
-                restaurants = data;
-                return true;
-            } catch (error) {
-                console.error('获取餐厅列表失败:', error);
-                showToast('获取餐厅列表失败，请稍后重试');
-                return false;
-            }
-        }
-
-        // 更新按钮状态
-        function updateButtonStates() {
-            const refreshButton = document.getElementById('refreshButton');
-            const spinButton = document.getElementById('spinButton');
-            
-            refreshButton.disabled = spinning || filteredRestaurants.length <= 9;
-            spinButton.disabled = spinning;
-        }
-
-        // 获取下一批餐厅
-        function getNextBatch() {
-            const start = currentPage * 9;
-            return filteredRestaurants.slice(start, start + 9);
-        }
-
-        // 刷新餐厅列表
-        async function refreshRestaurants() {
-            if (spinning) return;
-            
-            const nextBatch = getNextBatch();
-            if (nextBatch.length === 0) {
-                // 如果没有更多餐厅，重新获取数据
-                currentPage = 0;
-                await getRestaurants();
-            } else {
-                currentPage++;
-                updateGrid(nextBatch);
-            }
-            updateButtonStates();
-        }
-
-        // 获取餐厅数据
-        async function fetchRestaurants() {
-            const filters = getFilters();
-            
-            try {
-                // 确保我们有位置信息
-                if (!currentLocation) {
-                    console.log('Getting user location...');
-                    currentLocation = await getLocation();
-                }
-                console.log('Using location:', currentLocation);
-
-                // 获取餐厅数据
-                allRestaurants = await getRestaurantsFromAmap(currentLocation, filters.radius);
-                console.log('Got restaurants:', allRestaurants);
-
-                // 根据筛选条件过滤餐厅
-                filteredRestaurants = allRestaurants;
-                if (filters.price) {
-                    filteredRestaurants = filteredRestaurants.filter(r => r.cost?.startsWith(filters.price));
-                }
-                if (filters.rating) {
-                    filteredRestaurants = filteredRestaurants.filter(r => {
-                        const rating = parseFloat(r.biz_ext?.rating || 0);
-                        return rating >= parseFloat(filters.rating);
-                    });
-                }
-
-                if (filteredRestaurants.length === 0) {
-                    throw new Error('没有找到符合条件的餐厅');
-                }
-
-                // 更新格子显示
-                updateGrid(filteredRestaurants.slice(0, 9));
-                updateButtonStates();
-            } catch (error) {
-                console.error('Error fetching restaurants:', error);
-                alert(error.message || '获取餐厅数据时出错，请重试');
-                document.querySelector('.loading').classList.remove('show');
-            }
-        }
-
-        // 直接从高德 API 获取餐厅数据
-        async function getRestaurantsFromAmap(location, radius = 3000) {
-            const url = `https://restapi.amap.com/v3/place/around?key=${amapKey}&location=${location}&radius=${radius}&types=050000&offset=25&extensions=all`;
-            console.log('Fetching from Amap:', url);
-            
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                console.log('Amap response:', data);
-                
-                if (data.status === '1') {
-                    return data.pois || [];
-                }
-                console.error('Amap API error:', data);
-                return [];
-            } catch (error) {
-                console.error('Error fetching from Amap:', error);
-                return [];
-            }
-        }
-
-        // 加载收藏的餐厅
-        async function loadFavorites() {
-            try {
-                const response = await fetch('/api/favorites');
-                const data = await response.json();
-                favorites = new Set(data.map(r => r.amap_id));
-                updateFavoritesList(data);
-            } catch (error) {
-                console.error('Error loading favorites:', error);
-            }
-        }
-
-        // 更新收藏列表显示
-        function updateFavoritesList(restaurants) {
-            const favoritesList = document.getElementById('favoritesList');
-            favoritesList.innerHTML = '';
-            
-            restaurants.forEach(restaurant => {
-                const col = document.createElement('div');
-                col.className = 'col-md-6 mb-3';
-                col.innerHTML = `
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">${restaurant.name}</h5>
-                            <p class="card-text">
-                                <small>${restaurant.category}</small><br>
-                                <i class="fas fa-map-marker-alt"></i> ${restaurant.address}<br>
-                                ${restaurant.rating ? `<i class="fas fa-star"></i> ${restaurant.rating}` : ''}<br>
-                                ${restaurant.price ? `<i class="fas fa-yen-sign"></i> ${restaurant.price}` : ''}
-                            </p>
-                            <button class="btn btn-danger btn-sm" onclick="toggleFavorite('${restaurant.amap_id}')">
-                                <i class="fas fa-heart"></i> 取消收藏
-                            </button>
-                        </div>
-                    </div>
-                `;
-                favoritesList.appendChild(col);
-            });
-        }
-
-        // 更新餐厅信息显示
-        function updateRestaurantDisplay(restaurant) {
-            if (!restaurant) return;
-            
-            currentRestaurant = restaurant;
-            const card = document.getElementById('result');
-            
-            // 更新餐厅信息
-            card.querySelector('.restaurant-title').textContent = restaurant.name;
-            card.querySelector('.restaurant-rating-value').textContent = restaurant.biz_ext?.rating || '暂无评分';
-            card.querySelector('.restaurant-price-value').textContent = restaurant.cost || '价格未知';
-            card.querySelector('.restaurant-address').textContent = restaurant.address || '地址未知';
-            card.querySelector('.restaurant-phone').textContent = restaurant.tel || '电话未知';
-            
-            // 更新导航链接
-            const link = card.querySelector('.restaurant-link');
-            const mapUrl = `https://uri.amap.com/marker?position=${restaurant.location}&name=${encodeURIComponent(restaurant.name)}`;
-            link.href = mapUrl;
-            
-            // 更新收藏状态
-            const favoriteBtn = card.querySelector('.favorite-btn');
-            favoriteBtn.classList.toggle('active', favorites.has(restaurant.id));
-            
-            // 显示卡片
-            card.style.display = 'block';
-            
-            // 平滑滚动到餐厅详情
-            setTimeout(() => {
-                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }, 500);
-        }
-
-        // 获取筛选条件
-        function getFilters() {
-            return {
-                price: document.getElementById('priceFilter').value,
-                rating: document.getElementById('ratingFilter').value,
-                radius: document.getElementById('radiusFilter').value
-            };
-        }
-
-        // 更新抽奖格子显示
-        function updateGrid(restaurantsList) {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            restaurants = restaurantsList; // 更新当前显示的餐厅列表
-            
-            restaurantsList.forEach((restaurant, index) => {
-                const gridItem = document.createElement('div');
-                gridItem.className = 'grid-item';
-                gridItem.setAttribute('data-index', index);
-                
-                const content = document.createElement('div');
-                content.className = 'grid-item-content';
-                
-                const name = document.createElement('div');
-                name.className = 'restaurant-name';
-                name.textContent = restaurant.name;
-                
-                const rating = document.createElement('div');
-                rating.className = 'restaurant-rating';
-                rating.innerHTML = `<i class="fas fa-star"></i> ${restaurant.biz_ext?.rating || '暂无评分'}`;
-                
-                const price = document.createElement('div');
-                price.className = 'restaurant-price';
-                price.textContent = restaurant.cost || '价格未知';
-                
-                content.appendChild(name);
-                content.appendChild(rating);
-                content.appendChild(price);
-                gridItem.appendChild(content);
-                grid.appendChild(gridItem);
-            });
-        }
-
-        // 转盘动画和获取推荐
-        async function spinWheel() {
-            if (spinning) return;
-            spinning = true;
-            updateButtonStates();
-
-            const loadingIndicator = document.querySelector('.loading');
-            
-            try {
-                loadingIndicator.classList.add('show');
-                
-                // 如果还没有数据，先获取数据
-                if (filteredRestaurants.length === 0) {
-                    await fetchRestaurants();
-                }
-
-                const displayedRestaurants = document.querySelectorAll('.grid-item').length;
-                if (displayedRestaurants === 0) {
-                    throw new Error('没有找到符合条件的餐厅，请调整筛选条件后重试');
-                }
-
-                // 随机选择一家餐厅
-                const targetIndex = Math.floor(Math.random() * displayedRestaurants);
-                console.log('Chosen restaurant:', filteredRestaurants[currentPage * 9 + targetIndex]);
-
-                // 开始动画
-                currentIndex = 0;
-                animateSelection(targetIndex);
-            } catch (error) {
-                console.error('Error during spin:', error);
-                alert(error.message || '获取推荐时出错，请重试');
-                spinning = false;
-                updateButtonStates();
-                loadingIndicator.classList.remove('show');
-            }
-        }
-
-        // 动画效果
-        function animateSelection(targetIndex) {
-            const items = document.querySelectorAll('.grid-item');
-            const totalItems = items.length;
-            let speed = 100; // 初始速度
-            const maxSpeed = 300; // 最大速度
-            const speedIncrease = 10; // 速度增加量
-            
-            // 清除之前的高亮
-            items[currentIndex].classList.remove('highlight');
-            
-            function highlight() {
-                // 清除上一个高亮
-                items[currentIndex].classList.remove('highlight');
-                
-                // 更新索引
-                currentIndex = (currentIndex + 1) % totalItems;
-                
-                // 添加新的高亮
-                items[currentIndex].classList.add('highlight');
-                
-                // 逐渐减慢速度
-                speed = Math.min(speed + speedIncrease, maxSpeed);
-                
-                // 检查是否到达目标
-                if (speed >= maxSpeed && currentIndex === targetIndex) {
-                    clearInterval(animationInterval);
-                    spinning = false;
-                    // 使用当前显示的餐厅列表
-                    const selectedRestaurant = restaurants[targetIndex];
-                    updateRestaurantDisplay(selectedRestaurant);
-                    document.querySelector('.loading').classList.remove('show');
-                    updateButtonStates();
-                }
-            }
-            
-            // 开始动画
-            clearInterval(animationInterval);
-            animationInterval = setInterval(highlight, speed);
-        }
-
-        // 收藏/取消收藏餐厅
-        async function toggleFavorite() {
-            if (!currentRestaurant) return;
-
-            try {
-                if (favorites.has(currentRestaurant.id)) {
-                    const response = await fetch(`/api/favorites?id=${currentRestaurant.id}`, {
-                        method: 'DELETE'
-                    });
-                    if (response.ok) {
-                        favorites.delete(currentRestaurant.id);
+                    },
+                    (error) => {
+                        console.error('获取位置失败:', error);
+                        reject(error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
                     }
-                } else {
-                    const response = await fetch('/api/favorites', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(currentRestaurant)
-                    });
-                    if (response.ok) {
-                        favorites.add(currentRestaurant.id);
-                    }
-                }
-
-                // 更新收藏按钮状态
-                document.querySelector('.favorite-btn i').classList.toggle('active', favorites.has(currentRestaurant.id));
-                
-                // 重新加载收藏列表
-                await loadFavorites();
-            } catch (error) {
-                console.error('Error toggling favorite:', error);
-                alert('操作失败，请重试');
-            }
-        }
-
-        // 初始化
-        async function init() {
-            console.log('Initializing app...');
-            await loadFavorites();
-            
-            // 绑定事件
-            document.getElementById('spinButton').addEventListener('click', spinWheel);
-            document.getElementById('refreshButton').addEventListener('click', refreshRestaurants);
-            document.querySelector('.favorite-btn').addEventListener('click', toggleFavorite);
-            
-            // 初始化获取数据
-            await fetchRestaurants();
-        }
-
-        window.addEventListener('load', init);
-
-        // 位置选择相关功能
-        const locationBtn = document.getElementById('locationBtn');
-        const locationModal = document.getElementById('locationModal');
-        const modalClose = document.getElementById('modalClose');
-        const getCurrentLocationBtn = document.getElementById('getCurrentLocationBtn');
-        const currentLocationText = document.getElementById('currentLocationText');
-
-        // 打开位置选择弹窗
-        locationBtn.addEventListener('click', () => {
-            locationModal.style.display = 'block';
-            // 加载最近访问的位置
-            loadRecentLocations();
-        });
-
-        // 关闭位置选择弹窗
-        modalClose.addEventListener('click', () => {
-            locationModal.style.display = 'none';
-        });
-
-        // 点击弹窗外部关闭
-        locationModal.addEventListener('click', (e) => {
-            if (e.target === locationModal) {
-                locationModal.style.display = 'none';
-            }
-        });
-
-        // 获取当前位置
-        getCurrentLocationBtn.addEventListener('click', async () => {
-            currentLocationText.textContent = '正在获取位置...';
-            try {
-                await getCurrentLocation();
-                locationModal.style.display = 'none';
-            } catch (error) {
-                showToast('获取位置失败，请手动选择位置');
-            }
-        });
-
-        // 选择城市
-        document.querySelectorAll('.city-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const location = btn.dataset.location;
-                setLocation(location);
-                // 获取城市名称
-                const cityName = btn.textContent;
-                currentLocationText.textContent = cityName;
-                locationModal.style.display = 'none';
-            });
-        });
-
-        // 加载最近访问的位置
-        function loadRecentLocations() {
-            const recentLocations = document.getElementById('recentLocations');
-            const history = JSON.parse(localStorage.getItem('locationHistory') || '[]');
-            
-            recentLocations.innerHTML = history.map(location => {
-                // 这里可以添加逆地理编码来显示位置名称
-                return `<button class="city-btn" data-location="${location}">
-                            <i class="fas fa-history"></i> ${location}
-                        </button>`;
-            }).join('');
-
-            // 为新添加的按钮绑定事件
-            recentLocations.querySelectorAll('.city-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const location = btn.dataset.location;
-                    setLocation(location);
-                    locationModal.style.display = 'none';
-                });
+                );
             });
         }
-
-        // 初始化分类标签点击事件
-        document.querySelectorAll('.category-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                // 这里可以添加分类筛选逻辑
-            });
-        });
 
         // 高德地图搜索相关功能
         async function searchLocation(keyword) {
-            const url = `https://restapi.amap.com/v3/place/text?key=${amapKey}&keywords=${encodeURIComponent(keyword)}&city=全国&output=JSON`;
+            if (!keyword.trim()) return [];
+            
+            const url = `https://restapi.amap.com/v3/place/text?key=${amapKey}&keywords=${encodeURIComponent(keyword)}&city=全国&output=JSON&offset=20&page=1`;
             try {
+                showLoading();
                 const response = await fetch(url);
                 const data = await response.json();
+                
                 if (data.status === '1' && data.pois && data.pois.length > 0) {
-                    return data.pois;
+                    return data.pois.map(poi => ({
+                        location: poi.location,
+                        name: poi.name,
+                        address: poi.address || ''
+                    }));
                 }
                 return [];
             } catch (error) {
                 console.error('搜索位置失败:', error);
                 return [];
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '<div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> 搜索中...</div>';
+        }
+
+        // 隐藏加载状态
+        function hideLoading() {
+            const searchResults = document.getElementById('searchResults');
+            if (searchResults.querySelector('.loading-indicator')) {
+                searchResults.innerHTML = '';
             }
         }
 
@@ -1282,24 +562,36 @@
             // 关闭搜索弹窗
             modalClose.addEventListener('click', () => {
                 locationModal.style.display = 'none';
+                searchInput.value = '';
+                searchResults.innerHTML = '';
             });
 
             // 点击弹窗外部关闭
             locationModal.addEventListener('click', (e) => {
                 if (e.target === locationModal) {
                     locationModal.style.display = 'none';
+                    searchInput.value = '';
+                    searchResults.innerHTML = '';
                 }
             });
 
             // 搜索输入处理
             const handleSearch = debounce(async (keyword) => {
-                if (keyword.length < 2) return;
+                if (keyword.length < 2) {
+                    searchResults.innerHTML = '';
+                    return;
+                }
                 
                 const results = await searchLocation(keyword);
+                if (results.length === 0) {
+                    searchResults.innerHTML = '<div class="empty-results">未找到相关地点</div>';
+                    return;
+                }
+
                 searchResults.innerHTML = results.map(poi => `
                     <div class="search-item" data-location="${poi.location}" data-name="${poi.name}">
                         <div class="search-item-name">${poi.name}</div>
-                        <div class="search-item-address">${poi.address || poi.cityname + poi.adname}</div>
+                        <div class="search-item-address">${poi.address}</div>
                     </div>
                 `).join('');
 
@@ -1309,30 +601,301 @@
                         const location = item.dataset.location;
                         const name = item.dataset.name;
                         setLocation(location);
-                        currentLocationText.textContent = name;
+                        setLocationName(name);
                         locationModal.style.display = 'none';
-                        // 保存到历史记录
-                        saveLocationToHistory(location, name);
+                        searchInput.value = '';
+                        searchResults.innerHTML = '';
                     });
                 });
-            }, 500);
+            }, 300);
 
             searchInput.addEventListener('input', (e) => {
                 handleSearch(e.target.value.trim());
             });
+
+            // 键盘事件处理
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    locationModal.style.display = 'none';
+                    searchInput.value = '';
+                    searchResults.innerHTML = '';
+                }
+            });
         }
 
-        // 保存位置到历史记录
-        function saveLocationToHistory(location, name) {
-            let history = JSON.parse(localStorage.getItem('locationHistory') || '[]');
-            const newEntry = { location, name };
-            history = [newEntry, ...history.filter(item => item.location !== location)].slice(0, 5);
-            localStorage.setItem('locationHistory', JSON.stringify(history));
+        // 设置位置
+        function setLocation(location) {
+            if (isValidLocation(location)) {
+                currentLocation = location;
+                currentPage = 0; // 重置页码
+                filteredRestaurants = []; // 清空当前餐厅列表
+                fetchRestaurants(); // 立即获取新位置的餐厅
+            }
+        }
+
+        // 验证位置格式
+        function isValidLocation(location) {
+            const pattern = /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/;
+            if (!pattern.test(location)) return false;
+            
+            const [lon, lat] = location.split(',').map(Number);
+            return lon >= -180 && lon <= 180 && lat >= -90 && lat <= 90;
+        }
+
+        // 显示提示信息
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // 直接从高德 API 获取餐厅数据
+        async function getRestaurantsFromAmap(location, radius = 3000) {
+            const url = `https://restapi.amap.com/v3/place/around?key=${amapKey}&location=${location}&radius=${radius}&types=050000&offset=25&extensions=all`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === '1') {
+                    return data.pois || [];
+                }
+                console.error('Amap API error:', data);
+                return [];
+            } catch (error) {
+                console.error('Error fetching from Amap:', error);
+                return [];
+            }
+        }
+
+        // 获取餐厅数据
+        async function fetchRestaurants() {
+            document.querySelector('.loading').classList.add('show');
+            
+            try {
+                // 确保我们有位置信息
+                if (!currentLocation) {
+                    currentLocation = defaultLocation;
+                }
+
+                // 获取餐厅数据
+                allRestaurants = await getRestaurantsFromAmap(currentLocation);
+                
+                if (allRestaurants.length === 0) {
+                    throw new Error('没有找到符合条件的餐厅');
+                }
+
+                // 更新格子显示
+                filteredRestaurants = allRestaurants;
+                updateGrid(filteredRestaurants.slice(0, 9));
+                updateButtonStates();
+            } catch (error) {
+                console.error('Error fetching restaurants:', error);
+                showToast(error.message || '获取餐厅数据时出错，请重试');
+            } finally {
+                document.querySelector('.loading').classList.remove('show');
+            }
+        }
+
+        // 更新按钮状态
+        function updateButtonStates() {
+            const refreshButton = document.getElementById('refreshButton');
+            const spinButton = document.getElementById('spinButton');
+            
+            refreshButton.disabled = spinning || filteredRestaurants.length <= 9;
+            spinButton.disabled = spinning;
+        }
+
+        // 更新格子显示
+        function updateGrid(restaurantsList) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            restaurants = restaurantsList;
+            
+            restaurantsList.forEach((restaurant, index) => {
+                const gridItem = document.createElement('div');
+                gridItem.className = 'grid-item';
+                gridItem.setAttribute('data-index', index);
+                
+                const content = document.createElement('div');
+                content.className = 'grid-item-content';
+                
+                const name = document.createElement('div');
+                name.className = 'restaurant-name';
+                name.textContent = restaurant.name;
+                
+                const rating = document.createElement('div');
+                rating.className = 'restaurant-rating';
+                rating.innerHTML = `<i class="fas fa-star"></i> ${restaurant.biz_ext?.rating || '暂无评分'}`;
+                
+                const price = document.createElement('div');
+                price.className = 'restaurant-price';
+                price.textContent = restaurant.cost || '价格未知';
+                
+                content.appendChild(name);
+                content.appendChild(rating);
+                content.appendChild(price);
+                gridItem.appendChild(content);
+                grid.appendChild(gridItem);
+            });
+        }
+
+        // 更新餐厅信息显示
+        function updateRestaurantDisplay(restaurant) {
+            if (!restaurant) return;
+            
+            currentRestaurant = restaurant;
+            const card = document.getElementById('result');
+            
+            // 更新餐厅信息
+            card.querySelector('.restaurant-title').textContent = restaurant.name;
+            card.querySelector('.restaurant-rating-value').textContent = restaurant.biz_ext?.rating || '暂无评分';
+            card.querySelector('.restaurant-price-value').textContent = restaurant.cost || '价格未知';
+            card.querySelector('.restaurant-address').textContent = restaurant.address || '地址未知';
+            card.querySelector('.restaurant-phone').textContent = restaurant.tel || '电话未知';
+            
+            // 更新导航链接
+            const link = card.querySelector('.restaurant-link');
+            const mapUrl = `https://uri.amap.com/marker?position=${restaurant.location}&name=${encodeURIComponent(restaurant.name)}`;
+            link.href = mapUrl;
+            
+            // 显示卡片
+            card.style.display = 'block';
+            
+            // 平滑滚动到餐厅详情
+            setTimeout(() => {
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 500);
+        }
+
+        // 转盘动画和获取推荐
+        async function spinWheel() {
+            if (spinning) return;
+            spinning = true;
+            updateButtonStates();
+
+            const loadingIndicator = document.querySelector('.loading');
+            
+            try {
+                loadingIndicator.classList.add('show');
+                
+                // 如果还没有数据，先获取数据
+                if (filteredRestaurants.length === 0) {
+                    await fetchRestaurants();
+                }
+
+                const displayedRestaurants = document.querySelectorAll('.grid-item').length;
+                if (displayedRestaurants === 0) {
+                    throw new Error('没有找到符合条件的餐厅，请调整筛选条件后重试');
+                }
+
+                // 随机选择一家餐厅
+                const targetIndex = Math.floor(Math.random() * displayedRestaurants);
+
+                // 开始动画
+                currentIndex = 0;
+                animateSelection(targetIndex);
+            } catch (error) {
+                console.error('Error during spin:', error);
+                showToast(error.message || '获取推荐时出错，请重试');
+                spinning = false;
+                updateButtonStates();
+            } finally {
+                loadingIndicator.classList.remove('show');
+            }
+        }
+
+        // 动画效果
+        function animateSelection(targetIndex) {
+            const items = document.querySelectorAll('.grid-item');
+            const totalItems = items.length;
+            let speed = 100; // 初始速度
+            const maxSpeed = 300; // 最大速度
+            const speedIncrease = 10; // 速度增加量
+            
+            // 清除之前的高亮
+            if (currentIndex >= 0 && currentIndex < items.length) {
+                items[currentIndex].classList.remove('highlight');
+            }
+            
+            function highlight() {
+                // 清除上一个高亮
+                if (currentIndex >= 0 && currentIndex < items.length) {
+                    items[currentIndex].classList.remove('highlight');
+                }
+                
+                // 更新索引
+                currentIndex = (currentIndex + 1) % totalItems;
+                
+                // 添加新的高亮
+                items[currentIndex].classList.add('highlight');
+                
+                // 逐渐减慢速度
+                speed = Math.min(speed + speedIncrease, maxSpeed);
+                
+                // 检查是否到达目标
+                if (speed >= maxSpeed && currentIndex === targetIndex) {
+                    clearInterval(animationInterval);
+                    spinning = false;
+                    // 使用当前显示的餐厅列表
+                    const selectedRestaurant = restaurants[targetIndex];
+                    updateRestaurantDisplay(selectedRestaurant);
+                    updateButtonStates();
+                }
+            }
+            
+            // 开始动画
+            clearInterval(animationInterval);
+            animationInterval = setInterval(highlight, speed);
+        }
+
+        // 获取下一批餐厅
+        function getNextBatch() {
+            const start = currentPage * 9;
+            return filteredRestaurants.slice(start, start + 9);
+        }
+
+        // 刷新餐厅列表
+        async function refreshRestaurants() {
+            if (spinning) return;
+            
+            const nextBatch = getNextBatch();
+            if (nextBatch.length === 0) {
+                // 如果没有更多餐厅，重新获取数据
+                currentPage = 0;
+                await fetchRestaurants();
+            } else {
+                currentPage++;
+                updateGrid(nextBatch);
+            }
+            updateButtonStates();
+        }
+
+        // 设置位置名称
+        function setLocationName(name) {
+            const displayName = name.length > 8 ? name.substring(0, 8) + '...' : name;
+            document.getElementById('currentLocationText').textContent = displayName;
         }
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             initLocationSearch();
+            
+            // 绑定事件
+            document.getElementById('spinButton').addEventListener('click', spinWheel);
+            document.getElementById('refreshButton').addEventListener('click', refreshRestaurants);
+            
+            // 获取当前位置并初始化
+            getCurrentLocation().catch(() => {
+                // 如果获取位置失败，使用默认位置
+                setLocation(defaultLocation);
+                setLocationName('选择位置');
+            });
         });
     </script>
 </body>
