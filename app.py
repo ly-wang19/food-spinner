@@ -4,6 +4,7 @@ import random
 import os
 import logging
 from dotenv import load_dotenv
+from flask_sqlalchemy import SQLAlchemy
 from models import db, FavoriteRestaurant
 
 app = Flask(__name__)
@@ -14,7 +15,11 @@ logging.basicConfig(level=logging.DEBUG)
 app.logger.setLevel(logging.DEBUG)
 
 # 配置数据库
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///restaurants.db'
+database_url = os.getenv('DATABASE_URL', 'sqlite:///restaurants.db')
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # 从环境变量获取API密钥，如果没有则使用默认值
@@ -231,4 +236,5 @@ def handle_favorites():
         return jsonify({'error': 'Restaurant not found'}), 404
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5002)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
