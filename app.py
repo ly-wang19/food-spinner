@@ -35,7 +35,17 @@ def get_nearby_restaurants(location, radius=3000, types='050000', page=1):
     
     # 确保位置格式正确（经度在前，纬度在后）
     try:
-        lon, lat = map(float, location.split(','))
+        coords = location.split(',')
+        if len(coords) != 2:
+            app.logger.error(f"Invalid location format: {location}")
+            return []
+            
+        lon, lat = map(float, coords)
+        # 检查经纬度范围
+        if not (-180 <= lon <= 180 and -90 <= lat <= 90):
+            app.logger.error(f"Coordinates out of range: lon={lon}, lat={lat}")
+            return []
+            
         location = f"{lon},{lat}"
     except Exception as e:
         app.logger.error(f"Invalid location format: {location}, error: {e}")
@@ -48,25 +58,35 @@ def get_nearby_restaurants(location, radius=3000, types='050000', page=1):
         'types': types,
         'page': page,
         'offset': 25,
-        'extensions': 'all'
+        'extensions': 'all',
+        'show_fields': 'business,photos,rating'  # 请求更多字段
     }
     
     app.logger.info(f"Calling Amap API with params: {params}")
     
     try:
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params, timeout=10)  # 添加超时
         app.logger.debug(f"Amap API raw response: {response.text}")
         
         data = response.json()
         if data.get('status') == '1':
             restaurants = data.get('pois', [])
-            app.logger.info(f"Successfully found {len(restaurants)} restaurants")
+            if not restaurants:
+                app.logger.warning(f"No restaurants found for location: {location}")
+            else:
+                app.logger.info(f"Successfully found {len(restaurants)} restaurants")
             return restaurants
             
         app.logger.error(f"Amap API error: {data}")
         error_info = data.get('info', 'Unknown error')
         error_code = data.get('infocode', 'No code')
         app.logger.error(f"Error details - Code: {error_code}, Info: {error_info}")
+        return []
+    except requests.Timeout:
+        app.logger.error("Request to Amap API timed out")
+        return []
+    except requests.RequestException as e:
+        app.logger.error(f"Request error: {str(e)}")
         return []
     except Exception as e:
         app.logger.error(f"Error fetching restaurants: {str(e)}")
@@ -81,20 +101,32 @@ def get_restaurants():
     location = request.args.get('location', '116.473168,39.993015')
     price = request.args.get('price')
     rating = request.args.get('rating')
-    radius = request.args.get('radius', 3000)
+    radius = request.args.get('radius', '3000')
     
     app.logger.info(f"Fetching restaurants with params: location={location}, price={price}, rating={rating}, radius={radius}")
     
-    restaurants = get_nearby_restaurants(location, radius=radius)
+    try:
+        radius_int = int(radius)
+        if radius_int < 100 or radius_int > 50000:
+            return jsonify({'error': '搜索范围必须在100米到50公里之间'}), 400
+    except ValueError:
+        return jsonify({'error': '无效的搜索范围'}), 400
+    
+    restaurants = get_nearby_restaurants(location, radius=radius_int)
+    
+    if not restaurants:
+        return jsonify({'error': '没有找到餐厅，请尝试扩大搜索范围或更换位置'}), 404
     
     # 根据价格和评分筛选
     filtered_restaurants = []
     for r in restaurants:
         meets_criteria = True
         
-        if price and not r.get('cost', '').startswith(price):
-            meets_criteria = False
-            app.logger.debug(f"Restaurant {r.get('name')} filtered out due to price")
+        if price:
+            rest_price = r.get('cost', '')
+            if not rest_price.startswith(price):
+                meets_criteria = False
+                app.logger.debug(f"Restaurant {r.get('name')} filtered out due to price")
         
         if rating:
             try:
@@ -110,6 +142,10 @@ def get_restaurants():
             filtered_restaurants.append(r)
     
     app.logger.info(f"Found {len(filtered_restaurants)} restaurants after filtering")
+    
+    if not filtered_restaurants:
+        return jsonify({'error': '没有找到符合条件的餐厅，请调整筛选条件'}), 404
+        
     return jsonify(filtered_restaurants)
 
 @app.route('/api/recommend')
@@ -117,11 +153,18 @@ def recommend():
     location = request.args.get('location', '116.473168,39.993015')
     price = request.args.get('price')
     rating = request.args.get('rating')
-    radius = request.args.get('radius', 3000)
+    radius = request.args.get('radius', '3000')
     
     app.logger.info(f"Getting recommendation with params: location={location}, price={price}, rating={rating}, radius={radius}")
     
-    restaurants = get_nearby_restaurants(location, radius=int(radius))
+    try:
+        radius_int = int(radius)
+        if radius_int < 100 or radius_int > 50000:
+            return jsonify({'error': '搜索范围必须在100米到50公里之间'}), 400
+    except ValueError:
+        return jsonify({'error': '无效的搜索范围'}), 400
+    
+    restaurants = get_nearby_restaurants(location, radius=radius_int)
     app.logger.info(f"Found {len(restaurants)} restaurants before filtering")
     
     # 根据价格和评分筛选
@@ -129,9 +172,11 @@ def recommend():
     for r in restaurants:
         meets_criteria = True
         
-        if price and not r.get('cost', '').startswith(price):
-            meets_criteria = False
-            app.logger.debug(f"Restaurant {r.get('name')} filtered out due to price")
+        if price:
+            rest_price = r.get('cost', '')
+            if not rest_price.startswith(price):
+                meets_criteria = False
+                app.logger.debug(f"Restaurant {r.get('name')} filtered out due to price")
         
         if rating:
             try:
